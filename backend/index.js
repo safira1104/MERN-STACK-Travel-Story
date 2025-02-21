@@ -6,7 +6,8 @@ const express = require("express");
 const cors = require("cors");
 
 const jwt = require("jsonwebtoken");
-const { default: mongoose } = require("mongoose");
+const { mongoose } = require("mongoose");
+const {authenticateToken} = require("./utilities");
 
 const User = require("./models/user.model");
 
@@ -93,6 +94,22 @@ app.post("/login", async (req, res) => {
         message: "Login Successful",
         user: { fullName: user.fullName, email: user.email},
         accessToken,
+    });
+});
+
+// Get User
+app.get("/get-user", authenticateToken, async (req, res) => {
+    const { userId} = req.user;
+
+    const isUser = await User.findOne({_id: userId});
+
+    if(!isUser) {
+        return res.sendStatus(401);
+    }
+
+    return res.json({
+        user: isUser,
+        message: "",
     });
 });
 
