@@ -1,9 +1,14 @@
 require("dotenv").config();
 
 const config = require("./config.json");
+
 const bcrypt = require("bcrypt");
 const express = require("express");
 const cors = require("cors");
+const upload = require("./multer");
+const fs = require("fs");
+const path = require("path");
+
 
 const jwt = require("jsonwebtoken");
 const { mongoose } = require("mongoose");
@@ -11,6 +16,7 @@ const {authenticateToken} = require("./utilities");
 
 const User = require("./models/user.model");
 const TravelStory = require("./models/travelstory.model");
+const { error } = require("console");
 
 mongoose.connect(config.connectionString);
 
@@ -156,6 +162,22 @@ app.get("/get-all-stories", authenticateToken, async (req, res) => {
     }
 });
 
+//Route to handle image upload
+app.post("/image-upload", upload.single("image"), async (req, res) => {
+    try{
+        if(!req.file){
+            return res
+            .status(400)
+            .json({error: true, message: "No image uploaded"});
+        }
+
+        const imageUrl = `http://localhost:8000/uploads/${req.file.filename}`;
+
+        res.status(201).json({imageUrl});
+    }catch(error){
+        res.status(500).json({error: true, message: error.message});
+    }
+});
 
 app.listen(8000);
 
