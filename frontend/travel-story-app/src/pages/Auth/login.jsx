@@ -1,5 +1,6 @@
 import React from 'react'
 import { Navigate } from 'react-router-dom'
+import PasswordInput from '../../components/Input/password-input';
 
 const Login = () => {
   return (
@@ -21,6 +22,8 @@ const Login = () => {
             <h4 className='text-2xl font-semibold mb-7'>Login</h4>
 
             <input type="text" placeholder='Email' className='input-box' />
+
+            <PasswordInput />
 
             <button type='submit' className='btn-primary'>
               Login
