@@ -5,7 +5,7 @@ import axiosInstance from '../../utils/axiosInstance';
 
 const Home = () => {
 
-  const navigate = useNavigate;
+  const navigate = useNavigate();
 
   const [userInfo, setUserInfo] = useState(null);
 
