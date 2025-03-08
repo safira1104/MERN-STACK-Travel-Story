@@ -1,11 +1,15 @@
-import React, { useEffect, useState } from 'react'
-import Navbar from '../../components/navbar'
+import React, { useEffect, useState } from 'react';
+import Navbar from '../../components/navbar';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../../utils/axiosInstance';
+import {MdAdd} from "react-icons/md";
+import Modal from "react-modal";
 import TravelStoryCard from '../../components/Cards/travel-story-card';
 
 import { ToastContainer, toast } from "react-toastify";
 import"react-toastify/dist/ReactToastify.css";
+import AddEditTravelStory from './add-edit-travel-story';
+import { FaSlash } from 'react-icons/fa6';
 
 const Home = () => {
 
@@ -14,6 +18,12 @@ const Home = () => {
   const [userInfo, setUserInfo] = useState(null);
   const [allStories, setAllStories] = useState([]);
 
+  const [openAddEditModal, setOpenAddEditModal] = useState({
+    isShown: false,
+    type: "add",
+    data: null,
+  });
+  
   //Get User Info
   const getUserInfo = async () => {
     try {
@@ -112,6 +122,38 @@ const Home = () => {
         <div className='w-[320px]'></div>
       </div>
      </div>
+
+     {/*Add & Edit Travel Story Model  */}
+     <Modal
+      isOpen={openAddEditModal.isShown}
+      onRequestClose={()=> {}}
+      style={{
+        overlay: {
+          backgroundColor: "rgba(0,0,0,0.2)",
+          zIndex:999,
+        },
+      }}
+      appElement={document.getElementById("root")}
+      className="model-box"
+     >
+      <AddEditTravelStory 
+        type={openAddEditModal.type}
+        storyInfo={openAddEditModal.data}
+        onClose={() => {
+          setOpenAddEditModal({ isShown: false, type: "add", data: null });
+        }}
+        getAllTravelStories={getAllTravelStories}
+      />
+     </Modal>
+
+     <button
+      className='w-16 h-16 flex items-center justify-center rounded-full bg-primary hover:bg-cyan-400 fixed right-10 bottom-10'
+      onClick={() => {
+        setOpenAddEditModal({ isShown:true, type:"add", data: null });
+      }}
+     >
+      <MdAdd className="text-[32px] text-white" />
+     </button>
 
      <ToastContainer />
      
