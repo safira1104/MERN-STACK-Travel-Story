@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from 'react'
 import Navbar from '../../components/navbar'
-import { data, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../../utils/axiosInstance';
 import TravelStoryCard from '../../components/Cards/travel-story-card';
+
+import { ToastContainer, toast } from "react-toastify";
+import"react-toastify/dist/ReactToastify.css";
 
 const Home = () => {
 
@@ -47,7 +50,25 @@ const Home = () => {
   const handleViewStory = (data) => {}
 
   // Handle Update Favourite
-  const updateIsFavourite = async (storyData) => {}
+  const updateIsFavourite = async (storyData) => {
+    const storyId = storyData._id;
+
+    try {
+      const response = await axiosInstance.put(
+        "/update-is-favourite/" + storyId,
+        {
+          isFavourite: !storyData.isFavourite,
+        }
+      );
+
+      if(response.data && response.data.story){
+        toast.success("Story Updated Successfully");
+        getAllTravelStories();
+      }
+    }catch (error) {
+      console.log("An unexpected error occured. Please try again.")      
+    }
+  }
 
   useEffect(() => {
     getAllTravelStories();
@@ -91,6 +112,8 @@ const Home = () => {
         <div className='w-[320px]'></div>
       </div>
      </div>
+
+     <ToastContainer />
      
     </>
   );

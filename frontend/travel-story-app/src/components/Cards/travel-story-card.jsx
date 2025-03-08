@@ -23,6 +23,16 @@ const TravelStoryCard = ({
             onClick={onClick}
         />
 
+        <button 
+            className="w-12 h-12 flex items-center justify-center bg-white/40 rounded-lg border border-white/30 absolute top-4 right-4"
+            onClick={onFavouriteClick}
+        >
+            <FaHeart 
+                className={`icon-btn ${isFavourite ? "text-red-500" : "text-white"}`}
+            />
+
+        </button>
+
         <div className='p-4' onClick={onClick}>
             <div className='flex items-center gap-3'>
                 <div className='flex-1'>
