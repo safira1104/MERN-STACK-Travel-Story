@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { MdAdd, MdClose, MdDeleteOutline, MdUpdate } from 'react-icons/md'
+import { MdAdd, MdClose, MdDeleteOutline, MdUpdate } from 'react-icons/md';
 
 import DateSelector from '../../components/Input/date-selector';
 import ImageSelector from '../../components/Input/image-selector';
@@ -18,11 +18,11 @@ const AddEditTravelStory = ({
     onClose,
     getAllTravelStories,
 }) => {
-    const [title, setTitle] = useState("");
-    const [storyImg, setStoryImg] = useState(null);
-    const [story, setStory] = useState("");
-    const [visitedLocation, setVisitedLocation] = useState([]);
-    const [visitedDate, setVisitedDate] = useState(null);
+    const [title, setTitle] = useState(storyInfo?.title || "");
+    const [storyImg, setStoryImg] = useState(storyInfo?.imageUrl || null);
+    const [story, setStory] = useState(storyInfo?.story || "");
+    const [visitedLocation, setVisitedLocation] = useState(storyInfo?.visitedLocation || []);
+    const [visitedDate, setVisitedDate] = useState(storyInfo?.visitedDate || null);
 
     const [error, setError] = useState("");
 
@@ -57,12 +57,72 @@ const AddEditTravelStory = ({
                 onClose();
             }
         } catch (error) {
-            
+            if (
+                error.response &&
+                error.response.data &&
+                error.response.data.message
+            ) {
+                setError(error.response.data.message);
+            }else {
+                // Handle unexpected errors
+                setError("An unexpected error occured. Please try again");
+            }
         }
     };
 
     // Update Travel Story
-    const updateTravelStory = async () => {};
+    const updateTravelStory = async () => {
+
+        const storyId = storyInfo._id;
+        try {
+            let imageUrl = "";
+
+            let postData = {
+                
+                title,
+                story, 
+                imageUrl: storyInfo.imageUrl || "",
+                visitedLocation,
+                visitedDate: visitedDate
+                    ? moment(visitedDate).valueOf()
+                    : moment().valueOf(),
+            
+            }
+
+            if (typeof storyImg === "object") {
+                // Upload New Image
+                const imgUploadRes = await uploadImage(storyImg);
+                imageUrl = imgUploadRes.imageUrl || "";
+
+                postData = {
+                    ...postData,
+                    imageUrl: imageUrl,
+                };
+            }
+
+            const response = await axiosInstance.put("/edit-story/"+ storyId, postData );
+
+            if (response.data && response.data.story) {
+                toast.success("Story Updated Successfully");
+                // Resfresh stories
+                getAllTravelStories();
+                // Close modal or form
+                onClose();
+            }
+        } catch (error) {
+            
+            if (
+                error.response &&
+                error.response.data &&
+                error.response.data.message
+            ) {
+                setError(error.response.data.message);
+            }else {
+                // Handle unexpected errors
+                setError("An unexspected error occured. Please try again");
+            }
+        }
+    };
 
 
     const handleAddOrUpdateClick = () => {
@@ -89,9 +149,35 @@ const AddEditTravelStory = ({
     };
 
     // Delete story image and update the story
-    const handleDeleteStoryImg = async () => {}
+    const handleDeleteStoryImg = async () => {
+        // Deleting the image
+        const deleteImgRes = await axiosInstance.delete("/delete-image", {
+            params: {
+                imageUrl: storyInfo.imageUrl,
+            },
+        });
+
+        if (deleteImgRes.data) {
+            const storyId = storyInfo._id;
+
+            const postData = {
+                title,
+                story,
+                visitedLocation,
+                visitedDate: moment().valueOf(),
+                imageUrl: "",
+            };
+
+            // Updating story 
+            const response = await axiosInstance.put(
+                "/edit-story/" + storyId,
+                postData
+            );
+            setStoryImg(null);
+        };
+    };
   return (
-    <div>
+    <div className='relative'>
         <div className=' flex items-center justify-between'>
             <h5 className='text-xl font-medium text-slate-700'>
                 {type === "add" ? "Add Story" : "Update Story"}

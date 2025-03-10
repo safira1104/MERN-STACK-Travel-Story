@@ -60,7 +60,9 @@ const Home = () => {
   }
 
   // Handle Edit Story Click
-  const handleEdit = (data) => {}
+  const handleEdit = (data) => {
+    setOpenAddEditModal({ isShown:true, type:"edit", data: data });
+  }
 
   // Handle Travel Story Click
   const handleViewStory = (data) => {
@@ -84,7 +86,7 @@ const Home = () => {
         getAllTravelStories();
       }
     }catch (error) {
-      console.log("An unexpected error occured. Please try again.")      
+      console.log("An unexpected error occured. Please try again.");      
     }
   }
 
@@ -167,8 +169,15 @@ const Home = () => {
       className="model-box"
      >
       <ViewTravelStory
-        type= {openViewModal.type}
-        storyInfo = {openViewModal.data || null}
+        storyInfo = {openViewModal.data || null} 
+        onClose={() => {
+          setOpenViewModal((prevState) => ({ ...prevState, isShown: false}));
+        }}
+        onEditClick={() => {
+          setOpenViewModal((prevState) => ({ ...prevState, isShown: false}));
+          handleEdit(openViewModal.data || null)
+        }}
+        onDeleteClick={() => {}}
       />
      </Modal>
 
