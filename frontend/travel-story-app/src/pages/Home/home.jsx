@@ -10,6 +10,7 @@ import { ToastContainer, toast } from "react-toastify";
 import"react-toastify/dist/ReactToastify.css";
 import AddEditTravelStory from './add-edit-travel-story';
 import { FaSlash } from 'react-icons/fa6';
+import ViewTravelStory from './view-travel-story';
 
 const Home = () => {
 
@@ -21,6 +22,11 @@ const Home = () => {
   const [openAddEditModal, setOpenAddEditModal] = useState({
     isShown: false,
     type: "add",
+    data: null,
+  });
+
+  const [openViewModal, setOpenViewModal] = useState({
+    isShown: false,
     data: null,
   });
   
@@ -57,7 +63,9 @@ const Home = () => {
   const handleEdit = (data) => {}
 
   // Handle Travel Story Click
-  const handleViewStory = (data) => {}
+  const handleViewStory = (data) => {
+    setOpenViewModal({ isShown: true, data });
+  };
 
   // Handle Update Favourite
   const updateIsFavourite = async (storyData) => {
@@ -106,7 +114,6 @@ const Home = () => {
                       date={item.visitedDate}
                       visitedLocation={item.visitedLocation}
                       isFavourite={item.isFavourite}
-                      onEdit={()=> handleEdit(item)}
                       onClick={() => handleViewStory(item)}
                       onFavouriteClick={() => updateIsFavourite(item)}
 
@@ -143,6 +150,25 @@ const Home = () => {
           setOpenAddEditModal({ isShown: false, type: "add", data: null });
         }}
         getAllTravelStories={getAllTravelStories}
+      />
+     </Modal>
+
+     {/* View Travel Story Model  */}
+     <Modal
+      isOpen={openViewModal.isShown}
+      onRequestClose={()=> {}}
+      style={{
+        overlay: {
+          backgroundColor: "rgba(0,0,0,0.2)",
+          zIndex:999,
+        },
+      }}
+      appElement={document.getElementById("root")}
+      className="model-box"
+     >
+      <ViewTravelStory
+        type= {openViewModal.type}
+        storyInfo = {openViewModal.data || null}
       />
      </Modal>
 
