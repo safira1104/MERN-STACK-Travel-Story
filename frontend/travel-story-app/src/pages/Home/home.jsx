@@ -15,6 +15,9 @@ import EmptyCard from '../../components/Cards/empty-card';
 
 import EmptyImg from '../../assets/images/2.png'
 import { DayPicker } from 'react-day-picker';
+import moment from 'moment';
+import FilterInfoTitle from '../../components/Cards/filter-info-title';
+import { getEmptyCardMessage } from '../../utils/helper';
 
 const Home = () => {
 
@@ -26,7 +29,7 @@ const Home = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState('');
 
-  const [dateRange, setDateRange] = useState(null);
+  const [dateRange, setDateRange] = useState({form: null, to: null });
 
   const [openAddEditModal, setOpenAddEditModal] = useState({
     isShown: false,
@@ -94,6 +97,14 @@ const Home = () => {
         toast.success("Story Updated Successfully");
         getAllTravelStories();
       }
+
+      if (filterType === "search" && searchQuery) {
+        onSearchStory(searchQuery);
+      }else if (filterType === "date") {
+        filterStoriesByDate(dateRange);
+      } else {
+        getAllTravelStories();
+      }
     }catch (error) {
       console.log("An unexpected error occured. Please try again.");      
     }
@@ -128,10 +139,9 @@ const Home = () => {
       });
 
       if (response.data && response.data.stories) {
-        setFilterType("Search");
+        setFilterType("search");
         setAllStories(response.data.stories);
       }} catch (error) {
-      
         // Handle unexpected errors
         console.log("An unexspected error occured. Please try again");
       }
@@ -142,17 +152,45 @@ const Home = () => {
     getAllTravelStories();
   };
 
+  // Handle filter Travel Story by Date Range
+  const filterStoriesByDate = async (day) => {
+    try {
+      const startDate = day.from ? moment(day.from).valueOf() : null;
+      const endDate = day.to ? moment(day.to).valueOf() : null;
+
+      if (startDate && endDate) {
+        const response = await axiosInstance.get("/travel-stories/filter", {
+          params: {startDate, endDate},
+        });
+
+        if (response.data && response.data.stories) {
+          setFilterType("date");
+          setAllStories(response.data.stories);
+        }
+      }
+    } catch (error) {
+      // Handle unexpected errors
+      console.log("An unexspected error occured. Please try again");
+    }
+  };
+  
+  // Handle Date Range Select
+  const handleDayClick = (day) => {
+    setDateRange(day);
+    filterStoriesByDate(day);
+  }
+
+  const resetFilter = () => {
+    setDateRange({ from: null, to: null });
+    setFilterType("");
+    getAllTravelStories();
+  }
+
   useEffect(() => {
     getAllTravelStories();
     getUserInfo();
     return () => {};
   },[]);
-
-  // Handle Date Range Select
-  const handleDayClick = () => {
-    setDateRange(day);
-    filterStoriesByDate(day);
-  }
 
   return (
     <>
@@ -165,6 +203,15 @@ const Home = () => {
       />
 
      <div className='container mx-auto py-10'>
+
+      <FilterInfoTitle
+        filterType={filterType}
+        filterDates={dateRange}
+        onClear={() => {
+          resetFilter();
+        }}
+      />
+
       <div className='flex gap-7'>
         <div className='flex-1'>
           {
@@ -190,18 +237,20 @@ const Home = () => {
             ) : (
               <EmptyCard 
               imgSrc={EmptyImg} 
-              message={`Start creating your first Travel Story! Click the 'Add' button to jot down your thoughts, ideas, and memories. Lets get started!`}
+              message={getEmptyCardMessage(filterType)}
+              
               />
             )}
         </div>
 
-        <div className='w-[320px]'>
+        <div className='w-[350px]'>
           <div className='bg-white border border-slate-200 shadow-lg shadow-slate-200/60 rounded-lg'>
             <div className='p-3'>
               <DayPicker 
                 captionLayout='range'
                 mode="range"
                 selected={dateRange}
+                onSelect={handleDayClick}
                 pagedNavigation
               />
             </div>
