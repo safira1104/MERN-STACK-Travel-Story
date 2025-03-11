@@ -11,6 +11,10 @@ import"react-toastify/dist/ReactToastify.css";
 import AddEditTravelStory from './add-edit-travel-story';
 import { FaSlash } from 'react-icons/fa6';
 import ViewTravelStory from './view-travel-story';
+import EmptyCard from '../../components/Cards/empty-card';
+
+import EmptyImg from '../../assets/images/2.png'
+import { DayPicker } from 'react-day-picker';
 
 const Home = () => {
 
@@ -18,6 +22,11 @@ const Home = () => {
 
   const [userInfo, setUserInfo] = useState(null);
   const [allStories, setAllStories] = useState([]);
+
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterType, setFilterType] = useState('');
+
+  const [dateRange, setDateRange] = useState(null);
 
   const [openAddEditModal, setOpenAddEditModal] = useState({
     isShown: false,
@@ -103,10 +112,34 @@ const Home = () => {
       }
     } catch (error) {
       
-          // Handle unexpected errors
+      // Handle unexpected errors
       console.log("An unexspected error occured. Please try again");
       
      }
+  };
+
+  // Search Story
+  const onSearchStory = async (query) => {
+    try {
+      const response = await axiosInstance.get("/search", {
+        params: {
+          query,
+        },
+      });
+
+      if (response.data && response.data.stories) {
+        setFilterType("Search");
+        setAllStories(response.data.stories);
+      }} catch (error) {
+      
+        // Handle unexpected errors
+        console.log("An unexspected error occured. Please try again");
+      }
+  }
+
+  const handleClearSearch = () => {
+    setFilterType("");
+    getAllTravelStories();
   };
 
   useEffect(() => {
@@ -115,9 +148,21 @@ const Home = () => {
     return () => {};
   },[]);
 
+  // Handle Date Range Select
+  const handleDayClick = () => {
+    setDateRange(day);
+    filterStoriesByDate(day);
+  }
+
   return (
     <>
-     <Navbar userInfo={userInfo}/>
+     <Navbar 
+        userInfo={userInfo} 
+        searchQuery={searchQuery} 
+        setSearchQuery={setSearchQuery}
+        onSearchNote={onSearchStory}
+        handleClearSearch={handleClearSearch}
+      />
 
      <div className='container mx-auto py-10'>
       <div className='flex gap-7'>
@@ -143,11 +188,25 @@ const Home = () => {
                 })}
               </div>
             ) : (
-              <>Empty Card here</>
+              <EmptyCard 
+              imgSrc={EmptyImg} 
+              message={`Start creating your first Travel Story! Click the 'Add' button to jot down your thoughts, ideas, and memories. Lets get started!`}
+              />
             )}
         </div>
 
-        <div className='w-[320px]'></div>
+        <div className='w-[320px]'>
+          <div className='bg-white border border-slate-200 shadow-lg shadow-slate-200/60 rounded-lg'>
+            <div className='p-3'>
+              <DayPicker 
+                captionLayout='range'
+                mode="range"
+                selected={dateRange}
+                pagedNavigation
+              />
+            </div>
+          </div>
+        </div>
       </div>
      </div>
 
